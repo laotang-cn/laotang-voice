@@ -530,14 +530,19 @@ footer{padding:38px 0 54px; border-top:1px solid var(--line); margin-top:20px}
       <h2>下载</h2>
       <p>解压即用。模型自带，不需要再联网下载任何东西。</p>
       <div class="cta">
-        <!-- ▼▼ 下载链接在这里。默认指向同目录的 zip（适合整包拷给别人）。
-             如果改用网盘分享，把下面的 href 换成网盘直链，并删掉 download 属性。 ▼▼ -->
-        <a class="btn btn-primary" href="%E8%80%81%E5%94%90%E8%AF%AD%E9%9F%B3%E5%8A%A9%E6%89%8B-%E5%88%86%E4%BA%AB%E7%89%88.zip" download>
+        <!-- ▼▼ 下载链接：夸克网盘分享页（2026-09-27 启用）。
+             网盘是跨站链接，必须保留 target/rel，且绝不能加 download 属性
+             （跨站 + download 会被浏览器直接拦截，点了没反应）。 ▼▼ -->
+        <a class="btn btn-primary" href="https://pan.quark.cn/s/f3aaa9a77111?pwd=VW4F" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
-          下载 老唐语音助手-分享版.zip
+          去夸克网盘下载（1.51 GB）
         </a>
         <!-- ▲▲ 下载链接结束 ▲▲ -->
         <a class="btn btn-ghost" href="#start">安装步骤</a>
+      </div>
+      <div class="hash">
+        <code id="pwd">夸克提取码：VW4F</code>
+        <button class="copy" id="copyPwd" type="button">复制提取码</button>
       </div>
       <div class="meta">
         <div><span>版本</span><strong>2026-09-27</strong></div>
@@ -549,8 +554,8 @@ footer{padding:38px 0 54px; border-top:1px solid var(--line); margin-top:20px}
         <button class="copy" id="copyBtn" type="button">复制校验值</button>
       </div>
       <p style="margin-top:14px;font-size:13.5px;color:#8FB6AF">
+        点按钮会跳到夸克网盘，在网盘页点「下载」保存到本机即可；没自动填提取码就手动输入上面那串。
         下载后可以核对上面的 SHA-256，确认文件完整、没被改过。
-        如果点按钮没反应，直接打开这个网页所在文件夹，双击压缩包就行。
       </p>
     </div>
   </div>
@@ -566,22 +571,26 @@ footer{padding:38px 0 54px; border-top:1px solid var(--line); margin-top:20px}
 
 <script>
 (function(){
-  var b = document.getElementById('copyBtn');
-  if(!b) return;
-  b.addEventListener('click', function(){
-    var t = document.getElementById('sha').textContent.replace(/^SHA-256:\s*/,'').trim();
-    var done = function(){ b.textContent='已复制'; setTimeout(function(){ b.textContent='复制校验值'; },1600); };
-    if(navigator.clipboard && window.isSecureContext){
-      navigator.clipboard.writeText(t).then(done, fallback);
-    } else { fallback(); }
-    function fallback(){
-      var ta = document.createElement('textarea');
-      ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select();
-      try{ document.execCommand('copy'); done(); }catch(e){}
-      document.body.removeChild(ta);
-    }
-  });
+  function bind(btnId, srcId, strip, label){
+    var b = document.getElementById(btnId), s = document.getElementById(srcId);
+    if(!b || !s) return;
+    b.addEventListener('click', function(){
+      var t = s.textContent.replace(strip,'').trim();
+      var done = function(){ b.textContent='已复制'; setTimeout(function(){ b.textContent=label; },1600); };
+      if(navigator.clipboard && window.isSecureContext){
+        navigator.clipboard.writeText(t).then(done, fallback);
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); done(); }catch(e){}
+        document.body.removeChild(ta);
+      }
+    });
+  }
+  bind('copyBtn','sha',/^SHA-256:\s*/,'复制校验值');
+  bind('copyPwd','pwd',/^夸克提取码：/,'复制提取码');
 })();
 </script>
 </body>
